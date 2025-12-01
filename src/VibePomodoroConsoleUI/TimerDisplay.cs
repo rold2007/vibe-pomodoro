@@ -1,6 +1,7 @@
 using Spectre.Console;
+using VibePomodoroCore;
 
-namespace VibePomodoroConsole;
+namespace VibePomodoroConsoleUI;
 
 /// <summary>
 /// Handles all UI rendering for the pomodoro timer using Spectre.Console.

@@ -1,4 +1,4 @@
-namespace VibePomodoroConsole;
+namespace VibePomodoroCore;
 
 /// <summary>
 /// Represents the current state of the pomodoro timer.

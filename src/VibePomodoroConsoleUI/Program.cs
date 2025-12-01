@@ -1,6 +1,7 @@
 using Spectre.Console;
+using VibePomodoroCore;
 
-namespace VibePomodoroConsole;
+namespace VibePomodoroConsoleUI;
 
 class Program
 {

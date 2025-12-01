@@ -1,4 +1,4 @@
-namespace VibePomodoroConsole;
+namespace VibePomodoroCore;
 
 /// <summary>
 /// Core business logic for the pomodoro timer.

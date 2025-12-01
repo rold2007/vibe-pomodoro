@@ -1,2 +1,7 @@
 /src/bin
 /src/obj
+/.vs
+/src/VibePomodoroConsoleUI/bin
+/src/VibePomodoroConsoleUI/obj
+/src/VibePomodoroCore/bin
+/src/VibePomodoroCore/obj
