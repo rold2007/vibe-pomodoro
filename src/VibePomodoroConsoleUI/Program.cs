@@ -11,58 +11,80 @@ class Program
         var display = new TimerDisplay(timer);
 
         bool running = true;
+        var lastTick = DateTime.UtcNow;
+        int lastElapsedSeconds = -1;
 
         // Start the timer
         timer.Start();
 
-        while (running)
-        {
-            display.Render();
-            timer.Tick();
+        // Render static UI once
+        AnsiConsole.Write(display.GetStaticRenderable());
 
-            // Handle user input with timeout
-            ConsoleKeyInfo? key = null;
-            try
+        // Live update only the dynamic timer content
+        AnsiConsole.Live(display.GetDynamicRenderable())
+            .Start(ctx =>
             {
-                if (Console.KeyAvailable)
-                    key = Console.ReadKey(true);
-            }
-            catch
-            {
-                // Console input may not be available in some environments
-            }
-
-            if (key.HasValue)
-            {
-                switch (char.ToUpper(key.Value.KeyChar))
+                while (running)
                 {
-                    case ' ':
-                        var state = timer.GetState();
-                        if (state.IsRunning)
-                            timer.Pause();
-                        else
-                            timer.Start();
-                        break;
+                    // Only tick once per second
+                    var now = DateTime.UtcNow;
+                    if ((now - lastTick).TotalSeconds >= 1)
+                    {
+                        timer.Tick();
+                        lastTick = now;
+                    }
 
-                    case 'S':
-                        timer.SkipPhase();
-                        break;
+                    // Only refresh when seconds change
+                    var currentState = timer.GetState();
+                    if (currentState.ElapsedSeconds != lastElapsedSeconds)
+                    {
+                        ctx.UpdateTarget(display.GetDynamicRenderable());
+                        lastElapsedSeconds = currentState.ElapsedSeconds;
+                    }
 
-                    case 'R':
-                        timer.Reset();
-                        break;
+                    // Handle user input with timeout
+                    ConsoleKeyInfo? key = null;
+                    try
+                    {
+                        if (Console.KeyAvailable)
+                            key = Console.ReadKey(true);
+                    }
+                    catch
+                    {
+                        // Console input may not be available in some environments
+                    }
 
-                    case 'Q':
-                        running = false;
-                        break;
+                    if (key.HasValue)
+                    {
+                        switch (char.ToUpper(key.Value.KeyChar))
+                        {
+                            case ' ':
+                                var state = timer.GetState();
+                                if (state.IsRunning)
+                                    timer.Pause();
+                                else
+                                    timer.Start();
+                                break;
+
+                            case 'S':
+                                timer.SkipPhase();
+                                break;
+
+                            case 'R':
+                                timer.Reset();
+                                break;
+
+                            case 'Q':
+                                running = false;
+                                break;
+                        }
+                    }
+
+                    // Sleep for a short duration to keep UI responsive
+                    System.Threading.Thread.Sleep(50);
                 }
-            }
+            });
 
-            // Update every 100ms
-            System.Threading.Thread.Sleep(100);
-        }
-
-        AnsiConsole.Clear();
         AnsiConsole.MarkupLine("[yellow]Pomodoro timer stopped.[/]");
     }
 }

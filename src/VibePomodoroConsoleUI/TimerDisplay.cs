@@ -1,4 +1,5 @@
 using Spectre.Console;
+using Spectre.Console.Rendering;
 using VibePomodoroCore;
 
 namespace VibePomodoroConsoleUI;
@@ -16,45 +17,35 @@ public class TimerDisplay
     }
 
     /// <summary>
-    /// Renders the current state of the timer to the console.
+    /// Returns the static UI content (title and controls).
     /// </summary>
-    public void Render()
+    public IRenderable GetStaticRenderable()
+    {
+        var markup = "[bold cyan]Pomodoro Timer[/]\n\n[dim]Controls: Space=Start/Pause | S=Skip Phase | R=Reset | Q=Quit[/]\n";
+        return new Markup(markup);
+    }
+
+    /// <summary>
+    /// Returns the dynamic UI content (timer, phase, progress, status).
+    /// </summary>
+    public IRenderable GetDynamicRenderable()
     {
         var state = _timer.GetState();
-        
-        try
-        {
-            Console.Clear();
-        }
-        catch
-        {
-            // Clear screen may fail in some environments, skip it
-        }
-        
-        // Title
-        AnsiConsole.MarkupLine("[bold cyan]Pomodoro Timer[/]");
-        AnsiConsole.MarkupLine("");
-
-        // Phase indicator
         var phase = state.IsWorking ? "Work" : "Break";
         var phaseColor = state.IsWorking ? "green" : "blue";
-        AnsiConsole.MarkupLine($"Phase: [bold {phaseColor}]{phase}[/]");
-
-        // Timer display
         var timeColor = state.IsWorking ? "green" : "blue";
-        AnsiConsole.MarkupLine($"\n[bold {timeColor}]{state.RemainingMinutes:D2}:{state.RemainingSecondsInMinute:D2}[/]\n");
-
-        // Progress bar
         var progress = (double)state.ElapsedSeconds / state.TotalSeconds;
         var progressPercent = (int)(progress * 100);
-        AnsiConsole.MarkupLine($"Progress: {progressPercent}%");
-
-        // Status
         var statusText = state.IsRunning ? "Running" : "Paused";
-        var statusColor = state.IsRunning ? "yellow" : "gray";
-        AnsiConsole.MarkupLine($"\nStatus: [{statusColor}]{statusText}[/]");
+        var statusColor = state.IsRunning ? "yellow" : "grey";
 
-        // Controls
-        AnsiConsole.MarkupLine("\n[dim]Controls: Space=Start/Pause | S=Skip Phase | R=Reset | Q=Quit[/]");
+        var markup = $@"
+Phase: [bold {phaseColor}]{phase}[/]
+[bold {timeColor}]{state.RemainingMinutes:D2}:{state.RemainingSecondsInMinute:D2}[/]
+Progress: {progressPercent}%
+
+Status: [{statusColor}]{statusText}[/]
+";
+        return new Markup(markup);
     }
 }
